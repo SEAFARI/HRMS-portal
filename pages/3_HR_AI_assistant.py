@@ -16,7 +16,7 @@ df = conn.query(query,ttl = 0)
 if df.empty:
     context_string = "No employees have clocked in today yet."
 else:
-    context_string = df.to_string(index=False)
+    context_string = df.to_csv(index=False)
     
 if st.button("Generate Summary"):
     os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
@@ -26,13 +26,14 @@ if st.button("Generate Summary"):
         try:
             ## AI prompt
             prompt = f"""
-                You are an expert HR Communications Specialist. 
-                Analyze this live attendance data:
+                You are an HR Assistant. Read this CSV data:
+                
                 {context_string}
                 
-                Write a short, polished 3-sentence summary of today's workforce status. 
-                Mention who is currently active, who finished their shift, and if no one is here yet.
-                Do not include raw tables or bullet points.
+                Write a 2-sentence summary. 
+                If the 'clock_out' column has a time, the employee finished their shift. 
+                If the 'clock_out' column is blank or empty, they are still active.
+                Don't mention about CSV files. Say that - according to the data.
                 """
                 
             response = llm.invoke(prompt)
